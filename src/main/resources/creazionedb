@@ -1,0 +1,28 @@
+
+CREATE DATABASE IF NOT EXISTS `utenti` /*!40100 DEFAULT CHARACTER SET binary */;
+USE `utenti`;
+
+
+CREATE TABLE IF NOT EXISTS `utente` (
+  `id_utente` int(11) NOT NULL AUTO_INCREMENT,
+  `nome` varchar(50) NOT NULL,
+  `cognome` varchar(50) NOT NULL,
+  `email` varchar(50) NOT NULL,
+   `password` varchar(50) NOT NULL,
+  `data_nascita` date NOT NULL,
+  `sesso` varchar(50) NOT NULL,
+  `data_insert` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `data_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_utente`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+
+
+CREATE TABLE IF NOT EXISTS `evento` (
+  `id_evento` int(11) NOT NULL AUTO_INCREMENT,
+  `id_utente` varchar(50) NOT NULL,
+  `tipo_evento` varchar(50) NOT NULL,
+  `data_insert` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `data_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_evento`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
