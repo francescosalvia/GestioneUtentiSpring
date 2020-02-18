@@ -15,13 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class ServiceUtente {
@@ -43,13 +41,6 @@ public class ServiceUtente {
      * METODI UTILI
      **/
 
-    public String generateToken() {
-        int length = 8;
-        boolean lettere = true;
-        boolean numeri = true;
-
-        return RandomStringUtils.random(length, lettere, numeri);
-    }
 
 
     /**
@@ -90,7 +81,8 @@ public class ServiceUtente {
                 Login login = new Login();
                 evento.setIdUtente(utente1.getIdUtente());
                 evento.setTipoEvento("login");
-                evento.setToken(generateToken());
+                UUID uuid = UUID.randomUUID();
+                evento.setToken(uuid.toString());
 
                 Evento eventoSalvato = eventoRepository.save(evento);
 
@@ -104,18 +96,18 @@ public class ServiceUtente {
                 loginRepository.save(login);
                 logger.info("Evento login Salvato");
 
-            token = eventoSalvato.getToken();
+                token = eventoSalvato.getToken();
+
+            } else {
+                logger.warn("Passoword errata");
+            }
 
         } else {
-            logger.warn("Passoword errata");
+            logger.warn("Nessun utente trovato con questa email");
         }
 
-    } else{
-        logger.warn("Nessun utente trovato con questa email");
-    }
-
         return token;
-}
+    }
 
 
     public Optional<Utente> informazioniUtente(String token) {
@@ -279,18 +271,6 @@ public class ServiceUtente {
 
         return messaggio;
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

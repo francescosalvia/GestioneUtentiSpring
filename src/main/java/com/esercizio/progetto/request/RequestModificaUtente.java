@@ -3,7 +3,6 @@ package com.esercizio.progetto.request;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.time.LocalDate;
 
 public class RequestModificaUtente {
