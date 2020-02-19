@@ -11,15 +11,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class DaoUtente {
+public class DaoUtente extends DaoGeneral {
 
-    @PersistenceContext
-    private EntityManager em;
 
     @Transactional
     public Optional<Utente> findUtente(Integer idUtente){
 
-        Query query = em.createNativeQuery("SELECT * from utente where id_utente =  ?",Utente.class);
+        Query query = getEm().createNativeQuery("SELECT * from utente where id_utente =  ?",Utente.class);
         query.setParameter(1,idUtente);
         Utente utente1 = (Utente) query.getSingleResult();
 
@@ -27,7 +25,29 @@ public class DaoUtente {
 
     }
 
+    @Transactional
+    public Optional<Utente> findUtenteByEmail(String email){
 
+        Query query = getEm().createNativeQuery("SELECT * from utente where email =  ?",Utente.class);
+        query.setParameter(1,email);
+        Utente utente1 = (Utente) query.getSingleResult();
+
+        return Optional.of(utente1);
+
+    }
+
+    @Transactional
+    public boolean check(Utente utente){
+
+        Query query = getEm().createNativeQuery("SELECT * from utente where id_utente =  ?",Utente.class);
+        query.setParameter(1,utente.getIdUtente());
+        Optional<Utente> utente1 = Optional.of((Utente) query.getSingleResult());
+
+        if (!utente1.isPresent()){
+            return true;
+        }
+        return false;
+    }
 
 
 

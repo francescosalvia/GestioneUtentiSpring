@@ -1,6 +1,8 @@
 package com.esercizio.progetto.service;
 
+import com.esercizio.progetto.dao.DaoEvento;
 import com.esercizio.progetto.dao.DaoGeneral;
+import com.esercizio.progetto.dao.DaoLogin;
 import com.esercizio.progetto.dao.DaoUtente;
 import com.esercizio.progetto.data.Evento;
 import com.esercizio.progetto.data.Login;
@@ -43,6 +45,12 @@ public class ServiceUtente {
     @Autowired
     private DaoUtente daoUtente;
 
+    @Autowired
+    private DaoLogin daoLogin;
+
+    @Autowired
+    private DaoEvento daoEvento;
+
     /**
      * METODI UTILI
      **/
@@ -64,14 +72,14 @@ public class ServiceUtente {
         utente.setPassword(u.getPassword());
         utente.setSesso(u.getSesso());
 
-        utenteRepository.save(utente);
+        daoGeneral.save(utente);
 
     }
 
 
     public String loginUtente(RequestLogin l) {
 
-        Optional<Utente> utente = utenteRepository.findUtenteByEmail(l.getEmail());
+        Optional<Utente> utente = daoUtente.findUtenteByEmail(l.getEmail());
 
         String token = "Utente non loggato";
 
@@ -89,7 +97,7 @@ public class ServiceUtente {
                 UUID uuid = UUID.randomUUID();
                 evento.setToken(uuid.toString());
 
-                Evento eventoSalvato = eventoRepository.save(evento);
+                Evento eventoSalvato = (Evento) daoGeneral.save(evento);
 
                 login.setToken(eventoSalvato.getToken());
                 LocalDateTime time = LocalDateTime.now().plusMinutes(30);
@@ -98,7 +106,7 @@ public class ServiceUtente {
                 login.setIdEvento(eventoSalvato.getIdEvento());
 
 
-                loginRepository.save(login);
+                daoGeneral.save(login);
                 logger.info("Evento login Salvato");
 
                 token = eventoSalvato.getToken();
@@ -118,7 +126,7 @@ public class ServiceUtente {
     public Optional<Utente> informazioniUtente(String token) {
 
 
-        Optional<Login> login = loginRepository.findLoginByToken(token);
+        Optional<Login> login = daoLogin.findLoginByToken(token);
 
         Optional<Utente> resultUtente = Optional.empty();
 
@@ -130,7 +138,6 @@ public class ServiceUtente {
             long diff = ChronoUnit.SECONDS.between(now, login1.getScadenza());
 
             if (diff > 0) {
-                //Optional<Utente> utente = utenteRepository.findUtenteByIdUtente(login1.getIdUtente());
                 Optional<Utente> utente = daoUtente.findUtente(login1.getIdUtente());
                 if (utente.isPresent()) {
                     resultUtente = utente;
@@ -139,7 +146,7 @@ public class ServiceUtente {
                     newEvento.setTipoEvento("Informazioni Utente");
                     newEvento.setIdUtente(utente.get().getIdUtente());
                     newEvento.setToken(login1.getToken());
-                    eventoRepository.save(newEvento);
+                    daoGeneral.save(newEvento);
                     logger.info("Evento Informazioni Utente salvato ");
                 }
             } else {
@@ -153,7 +160,7 @@ public class ServiceUtente {
 
     public Optional<Utente> modificaUtente(RequestModificaUtente m, String token) {
 
-        Optional<Login> login = loginRepository.findLoginByToken(token);
+        Optional<Login> login = daoLogin.findLoginByToken(token);
 
         Optional<Utente> resultUtente = Optional.empty();
 
@@ -165,7 +172,7 @@ public class ServiceUtente {
             long diff = ChronoUnit.SECONDS.between(now, login1.getScadenza());
 
             if (diff > 0) {
-                Optional<Utente> utente = utenteRepository.findUtenteByIdUtente(login1.getIdUtente());
+                Optional<Utente> utente = daoUtente.findUtente(login1.getIdUtente());
                 if (utente.isPresent()) {
 
                     Utente newUtente = utente.get();
@@ -183,7 +190,7 @@ public class ServiceUtente {
                         newUtente.setDataNascita(m.getDataNascita());
                     }
 
-                    utenteRepository.save(newUtente);
+                    daoGeneral.save(newUtente);
                     logger.info("Utente modificato");
 
                     resultUtente = Optional.of(newUtente);
@@ -192,7 +199,7 @@ public class ServiceUtente {
                     newEvento.setTipoEvento("Modifica Utente");
                     newEvento.setIdUtente(utente.get().getIdUtente());
                     newEvento.setToken(login1.getToken());
-                    eventoRepository.save(newEvento);
+                    daoGeneral.save(newEvento);
                     logger.info("Evento Modifica Utente salvato ");
                 }
             } else {
@@ -205,9 +212,9 @@ public class ServiceUtente {
 
     public Optional<Utente> modificaPassword(String password, String token) {
 
-        Optional<Login> login = loginRepository.findLoginByToken(token);
+        Optional<Login> login = daoLogin.findLoginByToken(token);
 
-        Optional<com.esercizio.progetto.data.Utente> resultUtente = Optional.empty();
+        Optional<Utente> resultUtente = Optional.empty();
 
         if (login.isPresent()) {
             LocalDateTime now = LocalDateTime.now();
@@ -217,23 +224,24 @@ public class ServiceUtente {
             long diff = ChronoUnit.SECONDS.between(now, login1.getScadenza());
 
             if (diff > 0) {
-                Optional<com.esercizio.progetto.data.Utente> utente = utenteRepository.findUtenteByIdUtente(login1.getIdUtente());
+                Optional<Utente> utente = daoUtente.findUtente(login1.getIdUtente());
                 if (utente.isPresent()) {
 
                     Utente newUtente = utente.get();
 
                     newUtente.setPassword(password);
 
-                    utenteRepository.save(newUtente);
+                    Utente utenteSalvato = (Utente) daoGeneral.save(newUtente);
+                    resultUtente = Optional.of(utenteSalvato);
                     logger.info("Password modificata");
 
-                    resultUtente = Optional.of(newUtente);
+                    daoGeneral.save(newUtente);
 
                     Evento newEvento = new Evento();
                     newEvento.setTipoEvento("Modifica Password");
                     newEvento.setIdUtente(utente.get().getIdUtente());
                     newEvento.setToken(login1.getToken());
-                    eventoRepository.save(newEvento);
+                    daoGeneral.save(newEvento);
                     logger.info("Evento Modifica Password salvato ");
                 }
             } else {
@@ -248,7 +256,7 @@ public class ServiceUtente {
     public String logoutUtente(String token) {
 
         String messaggio = "Logout effettuato";
-        Optional<Login> login = loginRepository.findLoginByToken(token);
+        Optional<Login> login = daoLogin.findLoginByToken(token);
 
         if (login.isPresent()) {
 
@@ -264,10 +272,10 @@ public class ServiceUtente {
                 newEvento.setTipoEvento("Logout");
                 newEvento.setIdUtente(login1.getIdUtente());
                 newEvento.setToken(login1.getToken());
-                eventoRepository.save(newEvento);
+                daoGeneral.save(newEvento);
                 logger.info("Evento Logout salvato ");
 
-                loginRepository.delete(login1);
+                daoGeneral.delete(login1);
                 logger.info("Evento login eliminato ");
 
             } else {
