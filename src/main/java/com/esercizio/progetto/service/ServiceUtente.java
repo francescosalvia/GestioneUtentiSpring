@@ -138,7 +138,7 @@ public class ServiceUtente {
                     logger.info("Evento Informazioni Utente salvato ");
                 }
             } else {
-                logger.info("Sessione scaduta");
+                logger.info("Sessione scaduta!!!");
             }
 
         }
