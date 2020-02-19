@@ -144,5 +144,11 @@ public class ControllerUtente {
         return ResponseEntity.ok(new GenericResponse(serviceUtente.logoutUtente(estraiToken(token)), null));
     }
 
+    @PostMapping("/deleteAll")
+    public ResponseEntity<GenericResponse> removeAll(@RequestParam(value = "table") String table) {
+        serviceUtente.truncateTable(table);
+        return ResponseEntity.ok(new GenericResponse("Table pulita", null));
+    }
+
 
 }

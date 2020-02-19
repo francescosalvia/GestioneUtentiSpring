@@ -1,5 +1,6 @@
 package com.esercizio.progetto.service;
 
+import com.esercizio.progetto.dao.DaoGeneral;
 import com.esercizio.progetto.data.Evento;
 import com.esercizio.progetto.data.Login;
 import com.esercizio.progetto.data.Utente;
@@ -15,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -36,11 +36,12 @@ public class ServiceUtente {
     @Autowired
     private LoginRepository loginRepository;
 
+    @Autowired
+    private DaoGeneral daoGeneral;
 
     /**
      * METODI UTILI
      **/
-
 
 
     /**
@@ -271,6 +272,12 @@ public class ServiceUtente {
         }
 
         return messaggio;
+    }
+
+    public void truncateTable(String table) {
+        logger.info("Pulizia table");
+
+        daoGeneral.removeAll(table);
     }
 
 
