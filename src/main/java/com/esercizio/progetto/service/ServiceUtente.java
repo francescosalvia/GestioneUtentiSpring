@@ -9,13 +9,13 @@ import com.esercizio.progetto.repository.UtenteRepository;
 import com.esercizio.progetto.request.RequestLogin;
 import com.esercizio.progetto.request.RequestModificaUtente;
 import com.esercizio.progetto.request.RequestUtente;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -112,6 +112,7 @@ public class ServiceUtente {
 
     public Optional<Utente> informazioniUtente(String token) {
 
+
         Optional<Login> login = loginRepository.findLoginByToken(token);
 
         Optional<Utente> resultUtente = Optional.empty();
@@ -144,9 +145,9 @@ public class ServiceUtente {
     }
 
 
-    public Optional<Utente> modificaUtente(RequestModificaUtente m) {
+    public Optional<Utente> modificaUtente(RequestModificaUtente m, String token) {
 
-        Optional<Login> login = loginRepository.findLoginByToken(m.getToken());
+        Optional<Login> login = loginRepository.findLoginByToken(token);
 
         Optional<Utente> resultUtente = Optional.empty();
 
@@ -253,16 +254,16 @@ public class ServiceUtente {
 
             if (diff > 0) {
 
-                login1.setScadenza(now);
-
-                loginRepository.save(login1);
-
                 Evento newEvento = new Evento();
                 newEvento.setTipoEvento("Logout");
                 newEvento.setIdUtente(login1.getIdUtente());
                 newEvento.setToken(login1.getToken());
                 eventoRepository.save(newEvento);
                 logger.info("Evento Logout salvato ");
+
+                loginRepository.delete(login1);
+                logger.info("Evento login eliminato ");
+
             } else {
                 logger.info("Sessione scaduta");
                 messaggio = "Sessione gia scaduta";

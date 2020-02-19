@@ -11,13 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController
@@ -27,7 +23,6 @@ public class ControllerUtente {
 
     @Autowired
     private ServiceUtente serviceUtente;
-
 
 
     public boolean controlloEmail(String email) {
@@ -53,128 +48,101 @@ public class ControllerUtente {
         return (upCase && loCase && numeri);
     }
 
+    public String estraiToken(String token) {
 
+        String[] tokenArray = token.split(" ");
+
+        return  tokenArray[1];
+    }
 
 
     @PostMapping("/registrazione")
-    public GenericResponse registraUtente(@Valid @RequestBody RequestUtente newUtente) {
+    public ResponseEntity<GenericResponse> registraUtente(@Valid @RequestBody RequestUtente newUtente) {
 
-
-        String messaggio = "Utente registrato";
-        HttpStatus status = HttpStatus.CREATED;
         if (controlloEmail(newUtente.getEmail())) {
 
             if (controlloPassword(newUtente.getPassword())) {
                 serviceUtente.registraUtente(newUtente);
+                return ResponseEntity.ok(new GenericResponse("Utente registrato", null));
             } else {
                 logger.info("password non valida riprovare");
-                messaggio = "password non valida riprovare";
-                status = HttpStatus.NOT_ACCEPTABLE;
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new GenericResponse("password non valida riprovare", null));
             }
 
 
         } else {
             logger.info("Email non valida riprovare");
-            messaggio = "Email non valida riprovare";
-            status = HttpStatus.NOT_ACCEPTABLE;
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new GenericResponse("Email non valida riprovare", null));
         }
-
-        return new GenericResponse(messaggio,null,status);
     }
 
     @PostMapping("/login")
-    public GenericResponse loginUtente(@Valid @RequestBody RequestLogin newLogin) {
-
-        String messaggio;
-        HttpStatus status = HttpStatus.ACCEPTED;
+    public ResponseEntity<GenericResponse> loginUtente(@Valid @RequestBody RequestLogin newLogin) {
         if (controlloEmail(newLogin.getEmail())) {
 
             if (controlloPassword(newLogin.getPassword())) {
-                messaggio = serviceUtente.loginUtente(newLogin);
                 logger.info("Utente loggato");
+                return ResponseEntity.ok(new GenericResponse("Ok", serviceUtente.loginUtente(newLogin)));
+
             } else {
 
                 logger.info("password non valida riprovare");
-                messaggio = "password non valida riprovare";
-                status = HttpStatus.NOT_ACCEPTABLE;
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new GenericResponse("password non valida riprovare", null));
             }
 
         } else {
             logger.info("Email non valida riprovare");
-            messaggio = "Email non valida riprovare";
-            status = HttpStatus.NOT_ACCEPTABLE;
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new GenericResponse("Email non valida riprovare", null));
         }
 
-        return new GenericResponse(messaggio,null,status);
     }
 
     @PostMapping("/informazioni")
-    public GenericResponse informazioniUtente(@RequestParam(value = "token") String token) {
+    public ResponseEntity<GenericResponse> informazioniUtente(@RequestHeader(value="Authorization") String token) {
 
-        String messaggio;
-        HttpStatus status = HttpStatus.OK;
-        Optional<Utente> utente =  serviceUtente.informazioniUtente(token);
-        Utente utente1 = null;
-        if (utente.isPresent()){
-            messaggio = "Utente trovato";
+        Optional<Utente> utente = serviceUtente.informazioniUtente(estraiToken(token));
+        if (utente.isPresent()) {
             logger.info("Utente trovato");
-            utente1 = utente.get();
+            return ResponseEntity.ok(new GenericResponse("Utente trovato", utente.get()));
         } else {
-            messaggio = "Utente non trovato";
-            status = HttpStatus.NOT_ACCEPTABLE;
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new GenericResponse("Utente non trovato", null));
         }
-
-        return new GenericResponse(messaggio,utente1,status);
     }
 
     @PostMapping("/modifica")
-    public GenericResponse modificaUtente(@Valid @RequestBody RequestModificaUtente modUtente) {
+    public ResponseEntity<GenericResponse> modificaUtente(@Valid @RequestBody RequestModificaUtente modUtente,@RequestHeader(value="Authorization") String token) {
 
-        HttpStatus status = HttpStatus.OK;
-        String messaggio = "Sessione scaduta";
-        Optional<Utente> utente =  serviceUtente.modificaUtente(modUtente);
-        Utente utente1 = null;
-        if (utente.isPresent()){
-            messaggio = "Utente modificato";
-            utente1 = utente.get();
+        Optional<Utente> utente = serviceUtente.modificaUtente(modUtente,estraiToken(token));
+        if (utente.isPresent()) {
+            return ResponseEntity.ok(new GenericResponse("Utente trovato", utente.get()));
         } else {
-            status = HttpStatus.NOT_ACCEPTABLE;
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new GenericResponse("Modifica non eseguita", null));
         }
 
-        return new GenericResponse(messaggio,utente1,status);
+
     }
 
     @PostMapping("/modificapassword")
-    public GenericResponse modificaUtente(@RequestParam(value = "password") String password, @RequestParam(value = "token") String token) {
+    public ResponseEntity<GenericResponse> modificaUtente(@RequestParam(value = "password") String password,@RequestHeader(value="Authorization") String token) {
 
-        HttpStatus status = HttpStatus.OK;
-        Utente utente1 = null;
-        String messaggio = null;
         if (controlloPassword(password)) {
-            Optional<Utente> utente =  serviceUtente.modificaPassword(password,token);
-            if (utente.isPresent()){
-                messaggio = "password verificata";
-                utente1 = utente.get();
+            Optional<Utente> utente = serviceUtente.modificaPassword(password, estraiToken(token));
+            if (utente.isPresent()) {
+                return ResponseEntity.ok(new GenericResponse("password verificata", utente.get()));
             } else {
-                status = HttpStatus.NOT_ACCEPTABLE;
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new GenericResponse("Modifica password non eseguita", null));
             }
         } else {
-            messaggio = "password non valida";
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new GenericResponse("password non valida", null));
         }
 
-        return new GenericResponse(messaggio,utente1,status);
     }
 
     @PostMapping("/logout")
-    public GenericResponse modificaUtente(@RequestParam(value = "token") String token) {
+    public ResponseEntity<GenericResponse> modificaUtente(@RequestHeader(value="Authorization") String token) {
 
-        HttpStatus status = HttpStatus.OK;
-        String messaggio = serviceUtente.logoutUtente(token);
-
-        return new GenericResponse(messaggio,null,status);
+        return ResponseEntity.ok(new GenericResponse(serviceUtente.logoutUtente(estraiToken(token)), null));
     }
-
-
 
 
 }

@@ -12,13 +12,11 @@ public class RequestModificaUtente {
 
     private String cognome;
 
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate dataNascita;
 
     private String sesso;
 
-    @NotNull(message = "Campo obbligatorio, Inserire un token")
-    private String token;
 
     public String getNome() {
         return nome;
@@ -50,13 +48,9 @@ public class RequestModificaUtente {
 
     public void setSesso(String sesso) {
         this.sesso = sesso;
+
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
 }
+
+
