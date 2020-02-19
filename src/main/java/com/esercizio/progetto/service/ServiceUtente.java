@@ -1,6 +1,7 @@
 package com.esercizio.progetto.service;
 
 import com.esercizio.progetto.dao.DaoGeneral;
+import com.esercizio.progetto.dao.DaoUtente;
 import com.esercizio.progetto.data.Evento;
 import com.esercizio.progetto.data.Login;
 import com.esercizio.progetto.data.Utente;
@@ -38,6 +39,9 @@ public class ServiceUtente {
 
     @Autowired
     private DaoGeneral daoGeneral;
+
+    @Autowired
+    private DaoUtente daoUtente;
 
     /**
      * METODI UTILI
@@ -126,7 +130,8 @@ public class ServiceUtente {
             long diff = ChronoUnit.SECONDS.between(now, login1.getScadenza());
 
             if (diff > 0) {
-                Optional<Utente> utente = utenteRepository.findUtenteByIdUtente(login1.getIdUtente());
+                //Optional<Utente> utente = utenteRepository.findUtenteByIdUtente(login1.getIdUtente());
+                Optional<Utente> utente = daoUtente.findUtente(login1.getIdUtente());
                 if (utente.isPresent()) {
                     resultUtente = utente;
 
