@@ -11,6 +11,10 @@ public class GenericResponse {
         this.data = data;
     }
 
+    public GenericResponse() {
+
+    }
+
     public String getStatusMessage() {
         return statusMessage;
     }
@@ -25,6 +29,18 @@ public class GenericResponse {
 
     public void setData(Object data) {
         this.data = data;
+    }
+
+    public static GenericResponse ok(String str){
+        return new GenericResponse(str,null);
+    }
+
+    public static  GenericResponse failed(String str){
+        return new GenericResponse(str,null);
+    }
+
+    public static GenericResponse okObject(String str,Object object){
+        return new GenericResponse(str,object);
     }
 
 }

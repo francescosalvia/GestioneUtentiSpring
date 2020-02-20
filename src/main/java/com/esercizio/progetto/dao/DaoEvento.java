@@ -11,18 +11,4 @@ import javax.persistence.Query;
 public class DaoEvento extends  DaoGeneral {
 
 
-
-
-    @Transactional
-    public boolean check(Evento evento){
-
-        Query query = getEm().createNativeQuery("SELECT * from login where id_login =  ?",Login.class);
-        query.setParameter(1, evento.getIdEvento());
-        Evento evento1 = (Evento) query.getSingleResult();
-
-        if (evento1 == null) {
-            return false;
-        }
-        return true;
-    }
 }

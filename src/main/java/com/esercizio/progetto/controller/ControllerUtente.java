@@ -63,16 +63,16 @@ public class ControllerUtente {
 
             if (controlloPassword(newUtente.getPassword())) {
                 serviceUtente.registraUtente(newUtente);
-                return ResponseEntity.ok(new GenericResponse("Utente registrato", null));
+                return ResponseEntity.ok(GenericResponse.ok("Utente Registrato"));
             } else {
                 logger.info("password non valida riprovare");
-                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new GenericResponse("password non valida riprovare", null));
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(GenericResponse.failed("Password non valida riprovare"));
             }
 
 
         } else {
             logger.info("Email non valida riprovare");
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new GenericResponse("Email non valida riprovare", null));
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(GenericResponse.failed("Email non valida riprovare"));
         }
     }
 
@@ -82,17 +82,21 @@ public class ControllerUtente {
 
             if (controlloPassword(newLogin.getPassword())) {
                 logger.info("Utente loggato");
-                return ResponseEntity.ok(new GenericResponse("Ok", serviceUtente.loginUtente(newLogin)));
+                String risposta = serviceUtente.loginUtente(newLogin);
+                if (risposta.equalsIgnoreCase("Utente non loggato")) {
+                    return ResponseEntity.ok(GenericResponse.okObject("Error", risposta));
+                }
+                return ResponseEntity.ok(GenericResponse.okObject("Ok", risposta));
 
             } else {
 
                 logger.info("password non valida riprovare");
-                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new GenericResponse("password non valida riprovare", null));
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(GenericResponse.failed("Password non valida riprovare"));
             }
 
         } else {
             logger.info("Email non valida riprovare");
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new GenericResponse("Email non valida riprovare", null));
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(GenericResponse.failed("Email non valida riprovare"));
         }
 
     }
@@ -103,9 +107,9 @@ public class ControllerUtente {
         Optional<Utente> utente = serviceUtente.informazioniUtente(estraiToken(token));
         if (utente.isPresent()) {
             logger.info("Utente trovato");
-            return ResponseEntity.ok(new GenericResponse("Utente trovato", utente.get()));
+            return ResponseEntity.ok(GenericResponse.okObject("Ok, Utente trovato",utente.get()));
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new GenericResponse("Utente non trovato", null));
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(GenericResponse.failed("Utente non trovato"));
         }
     }
 
@@ -114,9 +118,9 @@ public class ControllerUtente {
 
         Optional<Utente> utente = serviceUtente.modificaUtente(modUtente,estraiToken(token));
         if (utente.isPresent()) {
-            return ResponseEntity.ok(new GenericResponse("Utente trovato", utente.get()));
+            return ResponseEntity.ok(GenericResponse.okObject("Ok, Utente trovato",utente.get()));
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new GenericResponse("Modifica non eseguita", null));
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(GenericResponse.failed("Modifica non eseguita"));
         }
 
 
@@ -128,12 +132,12 @@ public class ControllerUtente {
         if (controlloPassword(password)) {
             Optional<Utente> utente = serviceUtente.modificaPassword(password, estraiToken(token));
             if (utente.isPresent()) {
-                return ResponseEntity.ok(new GenericResponse("password verificata", utente.get()));
+                return ResponseEntity.ok(GenericResponse.okObject("password verificata", utente.get()));
             } else {
-                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new GenericResponse("Modifica password non eseguita", null));
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(GenericResponse.failed("Modifica password non eseguita"));
             }
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new GenericResponse("password non valida", null));
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(GenericResponse.failed("password non valida"));
         }
 
     }
@@ -141,13 +145,13 @@ public class ControllerUtente {
     @PostMapping("/logout")
     public ResponseEntity<GenericResponse> modificaUtente(@RequestHeader(value="Authorization") String token) {
 
-        return ResponseEntity.ok(new GenericResponse(serviceUtente.logoutUtente(estraiToken(token)), null));
+        return ResponseEntity.ok(GenericResponse.ok(serviceUtente.logoutUtente(estraiToken(token))));
     }
 
     @PostMapping("/deleteAll")
     public ResponseEntity<GenericResponse> removeAll(@RequestParam(value = "table") String table) {
         serviceUtente.truncateTable(table);
-        return ResponseEntity.ok(new GenericResponse("Table pulita", null));
+        return ResponseEntity.ok(GenericResponse.ok("Table pulita"));
     }
 
 

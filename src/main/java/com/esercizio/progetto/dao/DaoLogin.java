@@ -12,20 +12,6 @@ public class DaoLogin extends  DaoGeneral {
 
 
 
-
-    @Transactional
-    public boolean check(Login login){
-
-        Query query = getEm().createNativeQuery("SELECT * from login where id_login =  ?",Login.class);
-        query.setParameter(1, login.getIdLogin());
-        Login login1 = (Login) query.getSingleResult();
-
-        if (login1 == null) {
-            return false;
-        }
-        return true;
-    }
-
     @Transactional
     public Optional<Login> findLoginByToken(String token){
 
