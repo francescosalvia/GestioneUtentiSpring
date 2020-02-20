@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -39,10 +40,6 @@ public class ServiceUtente {
     @Autowired
     private DaoGeneral daoGeneral;
 
-    /**
-     * METODI UTILI
-     **/
-
 
     /**
      * 1) Registrazione utente
@@ -65,6 +62,7 @@ public class ServiceUtente {
     }
 
 
+    @Transactional
     public String loginUtente(RequestLogin l) {
 
         Optional<Utente> utente = utenteRepository.findUtenteByEmail(l.getEmail());
@@ -111,6 +109,7 @@ public class ServiceUtente {
     }
 
 
+    @Transactional
     public Optional<Utente> informazioniUtente(String token) {
 
 
@@ -146,6 +145,7 @@ public class ServiceUtente {
     }
 
 
+    @Transactional
     public Optional<Utente> modificaUtente(RequestModificaUtente m, String token) {
 
         Optional<Login> login = loginRepository.findLoginByToken(token);
@@ -198,6 +198,7 @@ public class ServiceUtente {
         return resultUtente;
     }
 
+    @Transactional
     public Optional<Utente> modificaPassword(String password, String token) {
 
         Optional<Login> login = loginRepository.findLoginByToken(token);
@@ -239,7 +240,7 @@ public class ServiceUtente {
         return resultUtente;
     }
 
-
+    @Transactional
     public String logoutUtente(String token) {
 
         String messaggio = "Logout effettuato";
